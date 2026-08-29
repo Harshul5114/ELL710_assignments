@@ -1,12 +1,3 @@
-"""
-Part A.  Get a baseline 
-Build a binary Huffman code for the sunlit distribution. Show the merge sequence and draw the tree — by hand 
-is perfectly acceptable, provided I can follow the order in which you combined things. 
-Report the codeword for each event, the length vector, the expected length L, the entropy H, and the efficiency. 
-Check that your lengths satisfy the Kraft inequality, and say what the value you obtain tells you about the code. 
-Finish with one sentence: how much does this buy you per record, compared with simply numbering the eight event types in three bits? 
-"""
-
 import math
 from huffman import HuffmanEncoder
 from probabilities import sunlit_distribution

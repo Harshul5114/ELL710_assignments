@@ -1,12 +1,9 @@
 import math
 
+
 class ShannonFanoElias:
+
     def __init__(self, probabilities):
-        """
-        probabilities: dict mapping symbol -> probability
-        Example:
-            {'A': 0.5, 'B': 0.3, 'C': 0.2}
-        """
         self.probabilities = probabilities
         self.codes = {}
 
@@ -30,8 +27,8 @@ class ShannonFanoElias:
             # Midpoint of the probability interval
             F = cumulative + probability / 2
 
-            # Number of bits required
-            L = int(-math.log2(probability)) + 1
+            # Number of bits required: ceil(log2(1/p)) + 1
+            L = math.ceil(-math.log2(probability)) + 1
 
             # Binary expansion of F
             code = self._binary_fraction(F, L)
@@ -40,12 +37,10 @@ class ShannonFanoElias:
 
             cumulative += probability
 
-
-
     @staticmethod
     def _binary_fraction(x, length):
-        """
-        Return the first `length` bits of the binary
+        """Return the first `length` bits of the binary
+
         fractional representation of x.
         """
         bits = []
@@ -54,21 +49,12 @@ class ShannonFanoElias:
             x *= 2
 
             if x >= 1:
-                bits.append('1')
+                bits.append("1")
                 x -= 1
             else:
-                bits.append('0')
+                bits.append("0")
 
-        return ''.join(bits)
-
-    def encode_symbol(self, symbol):
-        if symbol not in self.codes:
-            raise ValueError(f"Unknown symbol: {symbol}")
-
-        return self.codes[symbol]
-
-    def encode(self, message):
-        return ''.join(self.encode_symbol(symbol) for symbol in message)
+        return "".join(bits)
 
     def get_codes(self):
         return self.codes.copy()

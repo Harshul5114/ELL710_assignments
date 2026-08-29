@@ -603,14 +603,14 @@ Using the \(D\)-ary Huffman encoder, the resulting ternary codewords and their l
         \toprule
         \textbf{Event} & \textbf{Codeword} & \textbf{Length (symbols)} \\
         \midrule
-        E1 & 1   & 1 \\
-        E2 & 21  & 2 \\
-        E3 & 22  & 2 \\
-        E4 & 20  & 2 \\
-        E5 & 02  & 2 \\
-        E6 & 00  & 2 \\
-        E7 & 012 & 3 \\
-        E8 & 011 & 3 \\
+        E1 & \texttt{1}   & 1 \\
+        E2 & \texttt{21}  & 2 \\
+        E3 & \texttt{22}  & 2 \\
+        E4 & \texttt{20}  & 2 \\
+        E5 & \texttt{02}  & 2 \\
+        E6 & \texttt{00}  & 2 \\
+        E7 & \texttt{012} & 3 \\
+        E8 & \texttt{011} & 3 \\
         \bottomrule
     \end{tabular}
 \end{table}
@@ -644,8 +644,135 @@ To determine if the ternary link is superior to the binary one, they must be com
     \item \textbf{Baud-rate (symbol-rate) limited channel}: 
     If the transmitter is bandwidth-limited (i.e., can transmit a fixed number of symbols per second \(R_s\)), the ternary link is \textbf{better}. The binary code requires \(L_{\mathrm{binary}} = 2.7225\) bits/record (throughput of \(0.3673\) records/symbol), whereas the ternary code requires \(L_{\mathrm{ternary}} = 1.7700\) symbols/record (throughput of \(0.5650\) records/symbol). This represents a throughput increase of \(\boxed{53.81\%}\).
     
-    \item \textbf{Power-limited channel (AWGN Shannon capacity)}: 
+    \item \textbf{Power-limited channel}: 
     If the channel is limited by transmitter power and noise, the binary link is \textbf{better}. Transitioning from a 2-level line code (e.g., BPSK) to a 3-level line code (e.g., 3-PAM) requires a higher signal-to-noise ratio (SNR) to maintain the same bit error rate. Under fixed power and bandwidth constraints, the Shannon capacity (in bits/sec) is constant. Since the binary Huffman code is already highly efficient (\(97.65\%\)), there is negligible coding gain to be made by migrating to ternary signaling, and the binary link remains preferable due to its simpler hardware and lower SNR requirement.
+\end{enumerate}
+% ============================================================
+% Part F -- Try Shannon-Fano-Elias
+% ============================================================
+
+\section{Part F -- Try Shannon--Fano--Elias}
+
+We construct the Shannon--Fano--Elias (SFE) code for the mode-averaged distribution $p_m$. The codeword length for each symbol $x$ is determined by:
+\begin{equation}
+    l(x) = \left\lceil \log_2 \frac{1}{p_m(x)} \right\rceil + 1.
+\end{equation}
+The modified cumulative distribution function $\bar{F}(x)$ is computed as:
+\begin{equation}
+    \bar{F}(x_i) = \sum_{j=1}^{i-1} p_m(x_j) + \frac{1}{2} p_m(x_i).
+\end{equation}
+The binary codeword for each event is obtained by taking the first $l(x)$ bits of the fractional binary expansion of $\bar{F}(x)$.
+
+\subsection{SFE Code Construction Table}
+
+The cumulative probabilities, modified CDF values, codeword lengths, and binary codewords are summarized in Table~\ref{tab:sfe_code}.
+
+\begin{table}[H]
+    \centering
+    \caption{Shannon--Fano--Elias code table for the mode-averaged distribution $p_m$.}
+    \label{tab:sfe_code}
+    \begin{tabular}{lccccc}
+        \toprule
+        \textbf{Event} & $\boldsymbol{p_m(x)}$ & $\boldsymbol{F(x)}$ & $\boldsymbol{\bar{F}(x)}$ & $\boldsymbol{l(x)}$ & \textbf{Codeword} \\
+        \midrule
+        E1 & 0.2970 & 0.2970 & 0.148500 & 3 & \texttt{001} \\
+        E2 & 0.1650 & 0.4620 & 0.379500 & 4 & \texttt{0110} \\
+        E3 & 0.1750 & 0.6370 & 0.549500 & 4 & \texttt{1000} \\
+        E4 & 0.1625 & 0.7995 & 0.718250 & 4 & \texttt{1011} \\
+        E5 & 0.0730 & 0.8725 & 0.836000 & 5 & \texttt{11010} \\
+        E6 & 0.0605 & 0.9330 & 0.902750 & 6 & \texttt{111001} \\
+        E7 & 0.0435 & 0.9765 & 0.954750 & 6 & \texttt{111101} \\
+        E8 & 0.0235 & 1.0000 & 0.988250 & 7 & \texttt{1111110} \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\subsection{Performance Metrics and Bound Verification}
+
+The expected codeword length achieved by the SFE code is:
+\begin{equation}
+    L_{\mathrm{SFE}} = \sum_{i=1}^{8} p_m(E_i) l(E_i) = \boxed{4.0545\ \text{bits/record}}.
+\end{equation}
+
+The entropy of the mode-averaged distribution is $H(p_m) \approx 2.6595\text{ bits/record}$. 
+
+We verify whether the expected length satisfies the theoretical SFE bound $H(p_m) + 1 \le L_{\mathrm{SFE}} < H(p_m) + 2$:
+\begin{equation}
+    3.6595 \le 4.0545 < 4.6595.
+\end{equation}
+The calculated expected length of $4.0545$ bits/record strictly satisfies the theoretical bounds.
+
+\subsection{Downlink Capacity Analysis}
+
+To downlink all $1,700,000$ buffered records using the SFE design, the total required transmission capacity is:
+\begin{equation}
+    B_{\mathrm{SFE}} = 1,700,000 \times 4.0545 = \boxed{6,892,650\ \text{bits}}.
+\end{equation}
+
+Given the available single-pass capacity of $C_{\mathrm{pass}} = 4,608,000\text{ bits}$, the SFE code requires:
+\begin{equation}
+    \frac{6,892,650}{4,608,000} \times 100 \approx \boxed{149.58\%}
+\end{equation}
+of the downlink capacity.
+
+\textbf{Candidate Assessment:}
+Shannon--Fano--Elias coding is \textbf{not a serious candidate} for this downlink system. Because it requires nearly $150\%$ of the available pass capacity, the satellite cannot clear its buffered telemetry during a single pass, resulting in buffer overflow and catastrophic data loss for subsequent orbits. The $+1$ bit addition per symbol required to guarantee prefix-free status introduces significant redundancy ($1.3950$ bits/record above entropy), making SFE primarily a theoretical construction used to introduce arithmetic coding rather than a practical block code.
+% ============================================================
+% Part G -- Decide What to Fly
+% ============================================================
+
+\section{Part G -- Decide What to Fly}
+
+We compare the four candidate source coding designs for downlinking the $1,700,000$ buffered telemetry records over the single visible ground station pass ($C_{\mathrm{pass}} = 4,608,000\text{ bits}$). For framed schemes, an operational frame size of $N = 200$ records is assumed.
+
+\subsection{Quantitative Comparison of Coding Schemes}
+
+The total bits required to transmit the entire telemetry buffer and the corresponding pass capacity utilization for each design are summarized in Table~\ref{tab:final_comparison}.
+
+\begin{table}[H]
+    \centering
+    \caption{Downlink volume and capacity utilization across candidate designs.}
+    \label{tab:final_comparison}
+    \begin{tabular}{lcccc}
+        \toprule
+        \textbf{Design Scheme} & \textbf{Expected Length $L$} & \textbf{Total Bits} & \textbf{Capacity Used} & \textbf{Feasible?} \\
+        & (bits/record) & & (\%) & \\
+        \midrule
+        Fixed-length (3-bit) & 3.0000 & 5,100,000 & 110.68\% & No (Overflow) \\
+        Single Huffman ($p_m$) & 2.7225 & 4,628,250 & 100.44\% & No (Overflow) \\
+        \textbf{Two-Code Huffman} & \textbf{2.6485} & \textbf{4,510,950} & \textbf{97.89\%} & \textbf{Yes} \\
+        Shannon--Fano--Elias (SFE) & 4.0545 & 6,892,650 & 149.58\% & No (Overflow) \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\textit{Note on Two-Code Huffman calculation:} Incorporating a 1-bit mode flag per frame ($N = 200$) requires $8,500$ frame header bits across $8,500$ frames. The overall expected bit rate is $2.6485 + \frac{1}{200} = 2.6535\text{ bits/record}$, yielding a total volume of $4,510,950\text{ bits}$.
+
+\subsection{Design Selection and Justification}
+
+I recommend flying the \textbf{Two-Code Huffman design with a 1-bit frame header flag}.
+
+As shown in Table~\ref{tab:final_comparison}, it is the \textbf{only design that fits within the downlink capacity constraint} of $4.608\text{ Mbit}$. The fixed-length code ($110.68\%$), single Huffman code ($100.44\%$), and SFE code ($149.58\%$) all exceed $100\%$ capacity, meaning telemetry would accumulate in the buffer across orbits, ultimately resulting in permanent data loss. The two-code scheme achieves an operational margin of $97.05\text{ kbit}$ ($2.11\%$ of pass capacity), providing sufficient headroom for operational survival.
+
+\subsection{Unconsidered Effects, Operational Risks, and Mitigation Testing}
+
+While the arithmetic identifies the two-code scheme as the sole viable option, several practical assumptions could compromise the link:
+
+\begin{enumerate}
+    \item \textbf{Mode Shift and Non-Stationary Distributions:} The analysis assumes exact $65\% / 35\%$ orbit partitioning with stationary event probabilities inside each mode. Seasonal beta-angle variations, extended eclipse duration, or spacecraft tumbling will alter these distributions. If eclipse duration increases, the overall bit rate shifts toward $L_{\mathrm{eclipse}} = 2.7200\text{ bits/record}$, pushing total bits past $4.608\text{ Mbit}$.
+    \begin{itemize}
+        \item \textit{Testing:} Perform Monte Carlo orbit simulations over varying beta angles and thermal scenarios to map worst-case telemetry volume against satellite orbital precession.
+    \end{itemize}
+
+    \item \textbf{Synchronization Loss and Bit Error Propagation:} Variable-length prefix codes are vulnerable to bit errors over noisy links (e.g., UHF fading). A single corrupted bit in a Huffman stream can cause loss of frame synchronization and catastrophic burst errors across subsequent records until the next frame boundary.
+    \begin{itemize}
+        \item \textit{Testing:} Inject bit-error profiles (e.g., Markov-channel models representing fading and noise bursts) into telemetry streams to evaluate frame error rates (FER) and test self-synchronization behavior.
+    \end{itemize}
+
+    \item \textbf{Buffer Overhead and Framing Synchronization:} The calculations omit physical-layer framing overheads such as sync markers (preambles), packet sequence numbers, and Forward Error Correction (FEC / CRC) parity bits.
+    \begin{itemize}
+        \item \textit{Testing:} Conduct end-to-end Hardware-in-the-Loop (HITL) RF testing between the CubeSat communications board and ground station hardware to measure net protocol overhead.
+    \end{itemize}
 \end{enumerate}
 
 \end{document}
