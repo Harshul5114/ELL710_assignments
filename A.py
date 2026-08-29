@@ -28,7 +28,7 @@ print(f"\nLength Vector: L = {length_vector}")
 
 # expected length L
 L = sum(sunlit_distribution[event] * len(codes[event]) for event in events)
-print(f"Expected Length: L = {L:.2f} bits")
+print(f"Expected Length: L = {L:.4f} bits")
 
 # entropy H
 H = -sum(p * math.log2(p) for p in sunlit_distribution.values())
