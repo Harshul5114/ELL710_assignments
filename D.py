@@ -82,24 +82,32 @@ print(f"KL divergence D(pe || pm): "
 
 
 # ------------------------------------------------------------
+# ------------------------------------------------------------
 # Check the relationship:
 #
 # L_wrong - H(pe)
 # =
-# D(pe || pm) + [L_single - H(pm)]
+# D(pe || pm) + Expected Discretization Overhead under pe
+# where
+# Expected Discretization Overhead under pe = sum( pe(x) * (l(x) + log2(pm(x))) )
 # ------------------------------------------------------------
 
+expected_discretization_overhead_pe = sum(
+    eclipse_distribution[event]
+    * (single_code_lengths[event] + math.log2(mode_averaged_distribution[event]))
+    for event in eclipse_distribution
+)
+
+# For comparison, the redundancy under pm itself:
 H_m = -sum(
     p * math.log2(p)
     for p in mode_averaged_distribution.values()
 )
-
-single_code_redundancy = L_single - H_m
+redundancy_pm = L_single - H_m
 
 print("\nVerification:")
 print(f"L_wrong - H(pe):                 {penalty_entropy:.4f}")
 print(f"D(pe || pm):                     {D_e_pm:.4f}")
-print(f"Single-code redundancy:           "
-      f"{single_code_redundancy:.4f}")
-print(f"D + redundancy:                   "
-      f"{D_e_pm + single_code_redundancy:.4f}")
+print(f"Expected discretization overhead: {expected_discretization_overhead_pe:.4f}")
+print(f"D + overhead:                    {D_e_pm + expected_discretization_overhead_pe:.4f}")
+print(f"Single-code redundancy (under pm):{redundancy_pm:.4f}")

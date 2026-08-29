@@ -1,0 +1,651 @@
+\documentclass[11pt,a4paper]{article}
+
+% ---------- Packages ----------
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath, amssymb}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{siunitx}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage{xcolor}
+
+% ---------- Document ----------
+\begin{document}
+
+% ============================================================
+% Title Page
+% ============================================================
+
+\begin{titlepage}
+    \centering
+
+    \vspace*{2cm}
+
+    {\Large \textbf{ELL710 Coding Theory}\par}
+
+    \vspace{1.5cm}
+
+    {\huge \textbf{A Design Study}\par}
+
+    \vspace{0.5cm}
+
+    {\LARGE Telemetry Downlink for a CubeSat in Low Earth Orbit\par}
+
+    \vspace{2cm}
+
+    % \begin{tabular}{ll}
+    %     \textbf{Course:} & ELL710 / ELL7406 Coding Theory \\
+    %     \textbf{Department:} & Department of Electrical Engineering \\
+    %     \textbf{Institute:} & Indian Institute of Technology Delhi \\
+    %     \textbf{Module:} & Module 1 -- Source Coding \\
+    %     \textbf{Due Date:} & 31 August 2026
+    % \end{tabular}
+
+    \vfill
+
+\end{titlepage}
+
+
+% ============================================================
+% Introduction / Problem Setup
+% ============================================================
+
+\section{Problem Setup}
+
+We consider a 3U CubeSat operating in a low Earth orbit (LEO)
+that continuously generates housekeeping telemetry. Each telemetry
+record belongs to one of eight possible event types. The records
+accumulate in an onboard buffer and are downlinked to a single ground
+station during the one visible pass available to the spacecraft in
+each orbit.
+
+The communication link has a modest data rate and a short visibility
+window. Any data that cannot be transmitted during a pass is lost,
+since new telemetry continues to arrive during the following orbit.
+Therefore, efficient source coding is required to reduce the number of
+bits needed to transmit the telemetry.
+
+\subsection{System Parameters}
+
+The relevant system parameters are summarized in Table~\ref{tab:parameters}.
+
+\begin{table}[H]
+    \centering
+    \caption{CubeSat telemetry downlink parameters.}
+    \label{tab:parameters}
+    \begin{tabular}{lc}
+        \toprule
+        \textbf{Parameter} & \textbf{Value} \\
+        \midrule
+        Downlink & UHF \\
+        Data rate & \SI{9600}{bit/s} \\
+        Usable pass duration & \SI{480}{s} \\
+        Records buffered between passes & 1,700,000 \\
+        Sunlit fraction of orbit & 65\% \\
+        Eclipse fraction of orbit & 35\% \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+The capacity of one downlink pass is therefore
+
+\begin{equation}
+    C_{\mathrm{pass}}
+    = 9600 \times 480
+    = 4{,}608{,}000 \text{ bits}.
+\end{equation}
+
+Thus, the source coding scheme must be sufficiently efficient to
+transmit the buffered telemetry within this available capacity.
+
+\subsection{Telemetry Event Distributions}
+
+The telemetry source consists of eight event types. Their probabilities
+depend on the operating mode of the spacecraft. The source is assumed
+to be memoryless within each mode, and the operating mode remains
+constant within a frame.
+
+\begin{table}[H]
+    \centering
+    \caption{Telemetry event probabilities in the two operating modes.}
+    \label{tab:probabilities}
+    \begin{tabular}{lcc}
+        \toprule
+        \textbf{Event} & \textbf{Sunlit} & \textbf{Eclipse} \\
+        \midrule
+        E1 -- Housekeeping OK       & 0.36 & 0.18 \\
+        E2 -- Attitude update       & 0.20 & 0.10 \\
+        E3 -- Thermal reading       & 0.14 & 0.24 \\
+        E4 -- Power and battery     & 0.11 & 0.26 \\
+        E5 -- Payload status        & 0.08 & 0.06 \\
+        E6 -- Link event            & 0.05 & 0.08 \\
+        E7 -- Fault warning         & 0.04 & 0.05 \\
+        E8 -- Critical fault        & 0.02 & 0.03 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+The spacecraft operates in sunlight for 65\% of the orbit and in
+eclipse for 35\%. When a single probability distribution is required,
+the mode-averaged distribution is defined as
+
+\begin{equation}
+    p_m = 0.65p_s + 0.35p_e,
+\end{equation}
+
+where \(p_s\) and \(p_e\) denote the sunlit and eclipse distributions,
+respectively.
+
+\subsection{Coding Objective}
+
+The objective of this study is to investigate different source coding
+schemes for the telemetry and determine which design is most suitable
+for the CubeSat downlink.
+
+The analysis considers binary Huffman coding, the overhead associated
+with transmitting a code table, separate codes for different operating
+modes, coding with a mismatched source model, ternary Huffman coding,
+and Shannon--Fano--Elias coding. These designs are ultimately compared
+in terms of the total number of bits required to transmit the buffered
+telemetry and their utilization of the available downlink capacity.
+
+\newpage
+
+% ============================================================
+% Part A -- Get a Baseline
+% ============================================================
+
+\section{Part A -- Get a Baseline}
+
+A binary Huffman code is constructed using the sunlit probability
+distribution. The two least-probable symbols are repeatedly merged
+until a single tree is obtained.
+
+\subsection{Huffman Tree}
+
+The resulting Huffman tree is shown in Figure~\ref{fig:huffman_sunlit}.
+The left and right branches correspond to binary symbols 0 and 1,
+respectively.
+
+\begin{figure}[H]
+    \centering
+    % Insert your Huffman tree here
+    \includegraphics[width=0.65\textwidth]{huffman_sunlit.png}
+    \caption{Binary Huffman tree for the sunlit distribution.}
+    \label{fig:huffman_sunlit}
+\end{figure}
+
+\subsection{Codewords and Lengths}
+
+The resulting codewords and their lengths are shown in
+Table~\ref{tab:huffman_codes}.
+
+\begin{table}[H]
+    \centering
+    \caption{Sunlit Huffman code.}
+    \label{tab:huffman_codes}
+    \begin{tabular}{lcc}
+        \toprule
+        \textbf{Event} & \textbf{Codeword} & \textbf{Length} \\
+        \midrule
+        E1 & 11 & 2 \\
+        E2 & 01 & 2 \\
+        E3 & 101 & 3 \\
+        E4 & 100 & 3 \\
+        E5 & 000 & 3 \\
+        E6 & 0010 & 4 \\
+        E7 & 00111 & 5 \\
+        E8 & 00110 & 5 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+Thus, the length vector is
+
+\begin{equation}
+    \mathbf{l} = (l_1,l_2,\ldots,l_8)
+    = (2, 2, 3, 3, 3, 4, 5, 5).
+\end{equation}
+
+\subsection{Expected Code Length}
+
+The expected number of bits per telemetry record is
+
+\begin{equation}
+    L = \sum_{i=1}^{8} p_i l_i
+    = \boxed{2.6100\ \text{bits/record}}.
+\end{equation}
+
+\subsection{Entropy and Efficiency}
+
+The entropy of the sunlit distribution is
+
+\begin{equation}
+    H = -\sum_{i=1}^{8}p_i\log_2 p_i
+    = \boxed{2.55\ \text{bits/record}}.
+\end{equation}
+
+The coding efficiency is therefore
+
+\begin{equation}
+    \eta = \frac{H}{L}\times100
+    = \boxed{97.65\%}.
+\end{equation}
+
+\subsection{Kraft Inequality}
+
+For a binary prefix code, the codeword lengths must satisfy
+
+\begin{equation}
+    \sum_{i=1}^{8}2^{-l_i}\leq1.
+\end{equation}
+
+For the obtained code,
+
+\begin{equation}
+    \sum_{i=1}^{8}2^{-l_i}
+    = 1.000 \leq 1,
+\end{equation}
+
+so the Kraft inequality is satisfied.
+
+\subsection{Comparison with Fixed-Length Coding}
+
+A fixed-length representation requires
+
+\[
+\log_2 8 = 3
+\]
+
+bits per record. The Huffman code therefore saves
+
+\begin{equation}
+    3 - 2.6100 = \boxed{0.3900\ \text{bits/record}}
+\end{equation}
+
+on average compared with the fixed-length code.
+
+% ============================================================
+% Part B -- Pay for the Code Table
+% ============================================================
+
+\section{Part B -- Pay for the Code Table}
+
+Each frame carries its own canonical Huffman code table. Since there
+are eight codeword lengths and each length is represented using four
+bits, the header requires
+
+\begin{equation}
+    H_{\mathrm{header}} = 8 \times 4 = 32\text{ bits}.
+\end{equation}
+
+The fixed-length code requires no header since its mapping is fixed in
+advance.
+
+\subsection{Expected Bits per Frame}
+
+For a frame containing \(N\) records, the fixed-length code requires
+
+\begin{equation}
+    B_{\mathrm{fixed}}(N) = 3N.
+\end{equation}
+
+Using the expected Huffman length \(L=2.6100\) bits/record, the Huffman
+code requires
+
+\begin{equation}
+    B_{\mathrm{Huffman}}(N)
+    = 32 + 2.6100N.
+\end{equation}
+
+\subsection{Break-even Frame Size}
+
+Huffman coding becomes cheaper when
+
+\begin{align}
+    32 + 2.6100N &< 3N,\\
+    32 &< 0.3900N.
+\end{align}
+
+Thus,
+
+\begin{equation}
+    N > \frac{32}{0.3900}
+    = 82.05.
+\end{equation}
+
+Therefore, the smallest whole-number frame size for which Huffman
+coding is cheaper is
+
+\begin{equation}
+    \boxed{N=83}.
+\end{equation}
+
+At \(N=83\),
+
+\[
+B_{\mathrm{fixed}}=249.00\text{ bits},
+\qquad
+B_{\mathrm{Huffman}}=248.63\text{ bits}.
+\]
+
+Hence, Huffman coding is cheaper by \(0.37\) bits per frame at the
+break-even point.
+
+\subsection{Saving per Record}
+
+The net saving per record for a frame of size \(N\) is
+
+\begin{equation}
+    S(N)
+    = \frac{B_{\mathrm{fixed}}(N)-B_{\mathrm{Huffman}}(N)}{N}.
+\end{equation}
+
+Substituting the expressions above,
+
+\begin{equation}
+    S(N)
+    = 0.3900-\frac{32}{N}.
+\end{equation}
+
+The savings for the specified frame sizes are shown in
+Table~\ref{tab:frame_savings}.
+
+\begin{table}[H]
+    \centering
+    \caption{Comparison of fixed-length and Huffman coding for different frame sizes.}
+    \label{tab:frame_savings}
+    \begin{tabular}{cccc}
+        \toprule
+        \(N\) & Fixed-length (bits) & Huffman (bits) &
+        Saving (bits/record) \\
+        \midrule
+        50  & 150.0  & 162.5  & -0.250 \\
+        200 & 600.0  & 554.0  & 0.230 \\
+        500 & 1500.0 & 1337.0 & 0.326 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+For \(N=50\), the header overhead exceeds the compression benefit, so
+Huffman coding actually requires more bits per record. At \(N=200\)
+and \(N=500\), Huffman coding provides a net saving.
+
+As \(N\) increases,
+
+\begin{equation}
+    \lim_{N\rightarrow\infty} S(N)
+    = 0.3900\text{ bits/record}.
+\end{equation}
+
+Thus, the header overhead becomes negligible for sufficiently large
+frames. A frame size in the range of 200--500 records is therefore a
+safe choice based on the coding overhead considered here.
+
+\subsection{Maximum Huffman Codeword Length}
+
+For a binary Huffman tree with eight symbols, the most unbalanced
+possible tree can have a leaf at depth \textbf{7}.
+
+\begin{figure}[H]
+    \centering
+    % Insert maximum-depth Huffman tree here
+    \includegraphics[width=0.75\textwidth]{max_depth_tree.png}
+    \caption{A maximally unbalanced binary Huffman tree with eight symbols.}
+    \label{fig:max_depth_tree}
+\end{figure}
+
+Hence, the maximum possible codeword length is 7 bits. Since the
+length can range up to 7, a 3-bit field is sufficient to represent
+the codeword length. Therefore, the 4-bit field used in the assignment
+has one redundant bit per codeword length.
+
+% ============================================================
+% Part C -- One Code, or Two?
+% ============================================================
+
+\section{Part C -- One Code, or Two?}
+
+Two coding schemes are compared: a single Huffman code constructed
+from the mode-averaged distribution, and separate Huffman codes for
+the sunlit and eclipse modes. The latter requires only a one-bit mode
+flag per frame since both codebooks are known to the transmitter and
+receiver in advance.
+
+\subsection{Mode-Averaged Distribution}
+
+The mode-averaged distribution is calculated as
+
+\begin{equation}
+    p_m = 0.65p_s + 0.35p_e.
+\end{equation}
+
+This gives
+
+\begin{table}[H]
+    \centering
+    \caption{Mode-averaged telemetry distribution.}
+    \label{tab:mode_avg}
+    \begin{tabular}{lc}
+        \toprule
+        \textbf{Event} & \(\boldsymbol{p_m}\) \\
+        \midrule
+        E1 & 0.2970 \\
+        E2 & 0.1650 \\
+        E3 & 0.1750 \\
+        E4 & 0.1625 \\
+        E5 & 0.0730 \\
+        E6 & 0.0605 \\
+        E7 & 0.0435 \\
+        E8 & 0.0235 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\subsection{Expected Lengths}
+
+A Huffman code constructed from the mode-averaged distribution has an
+expected length of
+
+\begin{equation}
+    L_{\mathrm{single}} = 2.7225
+    \text{ bits/record}.
+\end{equation}
+
+For the two-code design, the expected lengths within each mode are
+
+\begin{align}
+    L_{\mathrm{sunlit}} &= 2.6100
+    \text{ bits/record},\\
+    L_{\mathrm{eclipse}} &= 2.7200
+    \text{ bits/record}.
+\end{align}
+
+Averaging these according to the fraction of time spent in each mode,
+
+\begin{align}
+    L_{\mathrm{two}}
+    &= 0.65L_{\mathrm{sunlit}}
+       + 0.35L_{\mathrm{eclipse}}\\
+    &= 0.65(2.6100)+0.35(2.7200)\\
+    &= \boxed{2.6485\text{ bits/record}}.
+\end{align}
+
+Thus, using separate Huffman codes reduces the expected coding length
+compared with the single-code design.
+
+\subsection{Saving of the Two-Code Design}
+
+The saving of the two-code design over the single-code design is
+
+\begin{equation}
+    \Delta L
+    = L_{\mathrm{single}}-L_{\mathrm{two}}
+    = 2.7225-2.6485
+    = \boxed{0.0740\text{ bits/record}}.
+\end{equation}
+
+The percentage saving is
+
+\begin{equation}
+    \frac{\Delta L}{L_{\mathrm{single}}}\times100
+    = \boxed{2.7181\%}.
+\end{equation}
+
+\subsection{Minimum Frame Size}
+
+For a frame containing \(N\) records, the single-code design requires
+
+\begin{equation}
+    B_{\mathrm{single}} = NL_{\mathrm{single}},
+\end{equation}
+
+while the two-code design requires one additional mode-flag bit:
+
+\begin{equation}
+    B_{\mathrm{two}} = NL_{\mathrm{two}}+1.
+\end{equation}
+
+The two-code design becomes cheaper when
+
+\begin{equation}
+    NL_{\mathrm{two}}+1 < NL_{\mathrm{single}}.
+\end{equation}
+
+Using the calculated expected lengths,
+
+\begin{equation}
+    N > \frac{1}{L_{\mathrm{single}}-L_{\mathrm{two}}}
+    = \frac{1}{0.0740}
+    \approx 13.51.
+\end{equation}
+
+Therefore, the smallest whole-number frame size for which the
+two-code design is cheaper is
+
+\begin{equation}
+    \boxed{N=14}.
+\end{equation}
+
+% ============================================================
+% Part D -- Put a Number on Using the Wrong Model
+% ============================================================
+
+\section{Part D -- Put a Number on Using the Wrong Model}
+
+We analyze the performance of the single-code design (optimized for the mode-averaged distribution \(p_m\)) when the spacecraft is in eclipse (operating under the eclipse distribution \(p_e\)).
+
+The expected length achieved by this mismatched code is:
+\begin{equation}
+    L_{\mathrm{wrong}} = \sum_{i=1}^{8} p_e(E_i) l_m(E_i) = \boxed{2.8200\ \text{bits/record}}.
+\end{equation}
+
+This length is compared with two reference values:
+\begin{itemize}
+    \item \textbf{Eclipse-optimal Huffman code}: \(L_{\mathrm{eclipse}} = 2.7200\) bits/record, yielding a penalty of:
+    \begin{equation}
+        \Delta L_{\mathrm{optimal}} = L_{\mathrm{wrong}} - L_{\mathrm{eclipse}} = \boxed{0.1000\ \text{bits/record}}.
+    \end{equation}
+    \item \textbf{Eclipse entropy}: \(H(p_e) \approx 2.6798\) bits/record, yielding a penalty of:
+    \begin{equation}
+        \Delta L_{\mathrm{entropy}} = L_{\mathrm{wrong}} - H(p_e) \approx \boxed{0.1402\ \text{bits/record}}.
+    \end{equation}
+\end{itemize}
+
+The Kullback--Leibler (KL) divergence measuring the theoretical mismatch penalty is:
+\begin{equation}
+    D(p_e \parallel p_m) = \sum_{i=1}^{8} p_e(E_i) \log_2 \left(\frac{p_e(E_i)}{p_m(E_i)}\right) \approx \boxed{0.1193\ \text{bits/record}}.
+\end{equation}
+
+Comparing the two, the penalty relative to entropy is larger than the KL divergence (\(0.1402 > 0.1193\)). This difference arises because the KL divergence assumes ideal fractional codeword lengths (\(l_m^*(x) = -\log_2 p_m(x)\)), whereas a real Huffman code must use integer lengths. The exact relationship is:
+\begin{equation}
+    L_{\mathrm{wrong}} - H(p_e) = D(p_e \parallel p_m) + \sum_{x} p_e(x) r(x),
+\end{equation}
+where \(r(x) = l_m(x) + \log_2 p_m(x)\) is the pointwise Huffman redundancy. The difference consists of the expected discretization overhead under the true distribution \(p_e\):
+\begin{equation}
+    \text{Expected Discretization Overhead under } p_e = \sum_{x} p_e(x) r(x) \approx \boxed{0.0209\ \text{bits/record}}.
+\end{equation}
+For reference, the discretization overhead (redundancy) of this single code under its own design distribution is \(L_{\mathrm{single}} - H(p_m) \approx 0.0630\) bits/record.
+
+% ============================================================
+% Part E -- Consider a Ternary Link
+% ============================================================
+
+\section{Part E -- Consider a Ternary Link}
+
+A proposed radio upgrade would use a three-level line code, making the channel alphabet size \(D = 3\). We construct a ternary Huffman code for the mode-averaged distribution \(p_m\).
+
+\subsection{Dummy Symbols and Divisibility Condition}
+
+In a \(D\)-ary Huffman tree, every merge combines \(D\) nodes into a single node, which reduces the number of active nodes in the pool by \(D - 1\). To reach exactly one root node starting from \(N_s\) source symbols and \(N_d\) dummy symbols, the total number of initial nodes must satisfy the divisibility condition:
+\begin{equation}
+    (N_s + N_d - 1) \equiv 0 \pmod{D - 1}.
+\end{equation}
+
+For \(N_s = 8\) and \(D = 3\):
+\begin{equation}
+    (8 + N_d - 1) \equiv (7 + N_d) \equiv 0 \pmod{2}.
+\end{equation}
+
+The smallest non-negative integer satisfying this condition is \(\boxed{N_d = 1}\) dummy symbol (with probability \(0\)).
+
+\subsection{Ternary Huffman Code Properties}
+
+Using the \(D\)-ary Huffman encoder, the resulting ternary codewords and their lengths are summarized in Table~\ref{tab:ternary_codes}.
+
+\begin{table}[H]
+    \centering
+    \caption{Ternary Huffman code for the mode-averaged distribution \(p_m\).}
+    \label{tab:ternary_codes}
+    \begin{tabular}{lcc}
+        \toprule
+        \textbf{Event} & \textbf{Codeword} & \textbf{Length (symbols)} \\
+        \midrule
+        E1 & 1   & 1 \\
+        E2 & 21  & 2 \\
+        E3 & 22  & 2 \\
+        E4 & 20  & 2 \\
+        E5 & 02  & 2 \\
+        E6 & 00  & 2 \\
+        E7 & 012 & 3 \\
+        E8 & 011 & 3 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+This yields the length vector:
+\begin{equation}
+    \mathbf{l} = (1, 2, 2, 2, 2, 2, 3, 3).
+\end{equation}
+
+The performance metrics of this ternary code are:
+\begin{itemize}
+    \item \textbf{Expected ternary length \(L_{\mathrm{ternary}}\)}:
+    \begin{equation}
+        L_{\mathrm{ternary}} = \sum_{i=1}^{8} p_m(E_i) l_i = \boxed{1.7700\ \text{ternary symbols/record}}.
+    \end{equation}
+    \item \textbf{Ternary entropy \(H_3(p_m)\)}:
+    \begin{equation}
+        H_3(p_m) = -\sum_{i=1}^{8} p_m(E_i) \log_3 p_m(E_i) \approx \boxed{1.6780\ \text{ternary symbols/record}}.
+    \end{equation}
+    \item \textbf{Coding efficiency \(\eta_3\)}:
+    \begin{equation}
+        \eta_3 = \frac{H_3(p_m)}{L_{\mathrm{ternary}}} \approx \boxed{94.80\%}.
+    \end{equation}
+\end{itemize}
+
+\subsection{Comparison: Ternary vs. Binary Link}
+
+To determine if the ternary link is superior to the binary one, they must be compared on a common physical basis. The conclusion depends on the physical limits of the channel:
+
+\begin{enumerate}
+    \item \textbf{Baud-rate (symbol-rate) limited channel}: 
+    If the transmitter is bandwidth-limited (i.e., can transmit a fixed number of symbols per second \(R_s\)), the ternary link is \textbf{better}. The binary code requires \(L_{\mathrm{binary}} = 2.7225\) bits/record (throughput of \(0.3673\) records/symbol), whereas the ternary code requires \(L_{\mathrm{ternary}} = 1.7700\) symbols/record (throughput of \(0.5650\) records/symbol). This represents a throughput increase of \(\boxed{53.81\%}\).
+    
+    \item \textbf{Power-limited channel (AWGN Shannon capacity)}: 
+    If the channel is limited by transmitter power and noise, the binary link is \textbf{better}. Transitioning from a 2-level line code (e.g., BPSK) to a 3-level line code (e.g., 3-PAM) requires a higher signal-to-noise ratio (SNR) to maintain the same bit error rate. Under fixed power and bandwidth constraints, the Shannon capacity (in bits/sec) is constant. Since the binary Huffman code is already highly efficient (\(97.65\%\)), there is negligible coding gain to be made by migrating to ternary signaling, and the binary link remains preferable due to its simpler hardware and lower SNR requirement.
+\end{enumerate}
+
+\end{document}
