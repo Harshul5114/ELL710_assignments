@@ -2,7 +2,7 @@
 # Part C -- One Code, or Two?
 # ============================================================
 
-from probabilities import sunlit_distribution, eclipse_distribution
+from telemetry_data import sunlit_distribution, eclipse_distribution
 from huffman import HuffmanEncoder
 
 SUNLIT_PROB = 0.65

@@ -1,25 +1,22 @@
 from SFE import ShannonFanoElias
-from probabilities import sunlit_distribution
+from telemetry_data import (
+    RECORDS_BUFFERED,
+    DATA_RATE_BPS,
+    PASS_DURATION_SECONDS,
+    PASS_CAPACITY_BITS,
+    pm_distribution,
+)
 
 import math
 
 # Downlink system parameters
-RECORD_COUNT = 1_700_000
-LINK_RATE = 9600  # bits per second
-PASS_DURATION = 480  # seconds
-PASS_CAPACITY = LINK_RATE * PASS_DURATION  # 4,608,000 bits
+RECORD_COUNT = RECORDS_BUFFERED
+LINK_RATE = DATA_RATE_BPS
+PASS_DURATION = PASS_DURATION_SECONDS
+PASS_CAPACITY = PASS_CAPACITY_BITS
 
 # Part F requires using the mode-averaged distribution p_m
-pm_distribution = {
-    "E1": 0.2970,
-    "E2": 0.1650,
-    "E3": 0.1750,
-    "E4": 0.1625,
-    "E5": 0.0730,
-    "E6": 0.0605,
-    "E7": 0.0435,
-    "E8": 0.0235,
-}
+pm_distribution = pm_distribution
 
 # Initialize encoder with mode-averaged distribution
 encoder = ShannonFanoElias(pm_distribution)

@@ -10,6 +10,23 @@
 \usepackage{float}
 \usepackage{hyperref}
 \usepackage{xcolor}
+\usepackage{listings}
+
+\lstset{
+    language=Python,
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue},
+    commentstyle=\color{gray},
+    stringstyle=\color{red!60!black},
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    stepnumber=1,
+    showstringspaces=false,
+    breaklines=true,
+    frame=single,
+    columns=fullflexible,
+    keepspaces=true
+}
 
 % ---------- Document ----------
 \begin{document}
@@ -774,5 +791,69 @@ While the arithmetic identifies the two-code scheme as the sole viable option, s
         \item \textit{Testing:} Conduct end-to-end Hardware-in-the-Loop (HITL) RF testing between the CubeSat communications board and ground station hardware to measure net protocol overhead.
     \end{itemize}
 \end{enumerate}
+
+\newpage
+
+\appendix
+\section{Appendix: Calculation Code}
+
+This appendix records the computational workflow used to generate the numerical results reported in the main text. The code is organized into separate subsections corresponding to the source-model definitions, the encoder implementations, and the calculation functions for each part of the assignment. In particular, the Huffman and Shannon--Fano--Elias encoder implementations are listed in separate subsections because they are reusable building blocks that are called from the analysis functions for Parts A--G. This separation keeps the logic clear: the encoder code defines the coding primitives, while the individual part functions compute the values reported in the main sections of the report.
+
+The following sections are intentionally left blank for direct pasting. Each subsection contains a heading and a placeholder area for the corresponding code, so that the appendix can be filled in systematically without altering the structure of the report.
+
+\subsection{Probability Model and Shared Definitions}
+\begin{lstlisting}[language=Python]
+# Your code goes here for the probability distributions and any shared constants.
+\end{lstlisting}
+
+\subsection{Huffman Encoder}
+\begin{lstlisting}[language=Python]
+# Your code goes here for the Huffman encoder implementation.
+\end{lstlisting}
+
+\subsection{Shannon--Fano--Elias Encoder}
+\begin{lstlisting}[language=Python]
+# Your code goes here for the Shannon--Fano--Elias encoder implementation.
+\end{lstlisting}
+
+\subsection{Part A: Huffman Baseline Calculations}
+\begin{lstlisting}[language=Python]
+# Your code goes here for Part A calculations.
+\end{lstlisting}
+
+\subsection{Part B: Code-Table Overhead and Break-Even Analysis}
+\begin{lstlisting}[language=Python]
+# Your code goes here for Part B calculations.
+\end{lstlisting}
+
+\subsection{Part C: One-Code vs Two-Code Comparison}
+\begin{lstlisting}[language=Python]
+# Your code goes here for Part C calculations.
+\end{lstlisting}
+
+\subsection{Part D: Wrong-Model Penalty Analysis}
+\begin{lstlisting}[language=Python]
+# Your code goes here for Part D calculations.
+\end{lstlisting}
+
+\subsection{Part E: Ternary Huffman Coding Analysis}
+\begin{lstlisting}[language=Python]
+# Your code goes here for Part E calculations.
+\end{lstlisting}
+
+\subsection{Part F: Shannon--Fano--Elias Construction}
+\begin{lstlisting}[language=Python]
+# Your code goes here for Part F calculations.
+\end{lstlisting}
+
+\subsection{Part G: Final Downlink Feasibility Comparison}
+\begin{lstlisting}[language=Python]
+# Your code goes here for Part G calculations.
+\end{lstlisting}
+
+\subsection{Main Driver for Running All Functions}
+\begin{lstlisting}[language=Python]
+# Your code goes here for the main routine that calls the functions for Parts A-G.
+\end{lstlisting}
 
 \end{document}

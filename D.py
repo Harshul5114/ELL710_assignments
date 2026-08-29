@@ -3,7 +3,7 @@
 # ============================================================
 
 import math
-from probabilities import sunlit_distribution, eclipse_distribution
+from telemetry_data import sunlit_distribution, eclipse_distribution
 from huffman import HuffmanEncoder
 from C import calculate_part_c
 

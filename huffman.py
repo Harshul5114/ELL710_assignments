@@ -1,4 +1,5 @@
 from heapq import heappop, heappush, heapify
+import sys
 
 class HuffmanNode:
     def __init__(self, char, freq):
@@ -64,7 +65,6 @@ class HuffmanEncoder:
         return codes
 
     def printTree(self):
-        import sys
         if hasattr(sys.stdout, 'reconfigure'):
             try:
                 sys.stdout.reconfigure(encoding='utf-8')

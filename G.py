@@ -1,8 +1,16 @@
+from telemetry_data import (
+    RECORDS_BUFFERED,
+    DATA_RATE_BPS,
+    PASS_DURATION_SECONDS,
+    PASS_CAPACITY_BITS,
+    FRAME_SIZE,
+)
+
 # Downlink parameters
-RECORD_COUNT = 1_700_000
-LINK_RATE = 9600  # bits per second
-PASS_DURATION = 480  # seconds
-PASS_CAPACITY = LINK_RATE * PASS_DURATION  # 4,608,000 bits
+RECORD_COUNT = RECORDS_BUFFERED
+LINK_RATE = DATA_RATE_BPS
+PASS_DURATION = PASS_DURATION_SECONDS
+PASS_CAPACITY = PASS_CAPACITY_BITS
 
 # Expected lengths per record (L in bits/record)
 L_fixed = 3.0000
@@ -11,8 +19,8 @@ L_two_huffman = 2.6485
 L_sfe = 4.0545
 
 # Frame sizes and overheads for realistic deployment
-FRAME_SIZE = 200  # Records per frame
-
+FRAME_SIZE = FRAME_SIZE  # Records per frame
+OVERHEAD_FIXED = 0  # No additional overhead
 # Header/Flag bits per frame
 HEADER_FIXED = 0  # No header
 HEADER_SINGLE = 0  # Single code agreed in advance

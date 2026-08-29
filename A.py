@@ -1,6 +1,6 @@
 import math
 from huffman import HuffmanEncoder
-from probabilities import sunlit_distribution
+from telemetry_data import sunlit_distribution
 
 # building the Huffman tree and generating codes
 encoder = HuffmanEncoder(sunlit_distribution)

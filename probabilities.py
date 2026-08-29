@@ -1,24 +1,40 @@
-# Sunlit distribution:
-sunlit_distribution = {
-    "E1": 0.36,  # Housekeeping OK
-    "E2": 0.20,  # Attitude update
-    "E3": 0.14,  # Thermal reading
-    "E4": 0.11,  # Power and battery
-    "E5": 0.08,  # Payload status
-    "E6": 0.05,  # Link event
-    "E7": 0.04,  # Fault warning
-    "E8": 0.02   # Critical fault
-}
+"""Backward-compatible import shim for the telemetry data module.
 
-# Eclipse distribution:
-eclipse_distribution = {
-    "E1": 0.18,  # Housekeeping OK
-    "E2": 0.10,  # Attitude update
-    "E3": 0.24,  # Thermal reading
-    "E4": 0.26,  # Power and battery
-    "E5": 0.06,  # Payload status
-    "E6": 0.08,  # Link event
-    "E7": 0.05,  # Fault warning
-    "E8": 0.03   # Critical fault  
-}
+The project now stores the official system parameters and event distributions in
+telemetry_data.py. This file preserves older imports such as
+``from probabilities import sunlit_distribution`` while redirecting everything
+through the shared centralized definitions.
+"""
+
+from telemetry_data import (
+    DOWNLINK,
+    DATA_RATE_BPS,
+    PASS_DURATION_SECONDS,
+    RECORDS_BUFFERED,
+    SUNLIT_FRACTION,
+    ECLIPSE_FRACTION,
+    FRAME_SIZE,
+    PASS_CAPACITY_BITS,
+    sunlit_distribution,
+    eclipse_distribution,
+    pm_distribution,
+    mode_averaged_distribution,
+    mode_averaged,
+)
+
+__all__ = [
+    "DOWNLINK",
+    "DATA_RATE_BPS",
+    "PASS_DURATION_SECONDS",
+    "RECORDS_BUFFERED",
+    "SUNLIT_FRACTION",
+    "ECLIPSE_FRACTION",
+    "FRAME_SIZE",
+    "PASS_CAPACITY_BITS",
+    "sunlit_distribution",
+    "eclipse_distribution",
+    "pm_distribution",
+    "mode_averaged_distribution",
+    "mode_averaged",
+]
 
